@@ -1,4 +1,5 @@
 from argo_mcp.config import Settings
+from fastapi import FastAPI
 from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import (
@@ -6,10 +7,11 @@ from opentelemetry.sdk.trace.export import (
     ConsoleSpanExporter,
     BatchSpanProcessor,
 )
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 
 
-def setup_telemetry(settings: Settings):
+def setup_telemetry(app: FastAPI, settings: Settings):
     """OTel Setup"""
 
     # Initialize the provider
@@ -26,4 +28,6 @@ def setup_telemetry(settings: Settings):
 
     # Set as global
     trace.set_tracer_provider(provider)
-    pass
+
+    # Use FastAPI auto instrumentor
+    FastAPIInstrumentor().instrument_app(app)
